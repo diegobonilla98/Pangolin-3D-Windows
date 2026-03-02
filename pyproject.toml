@@ -1,34 +1,23 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.8",
+    "scikit-build-core>=0.11",
     "pybind11>=2.11",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pangolin-fast"
+name = "pangolin-windows-easy"
 version = "0.1.0"
-description = "High-performance Pangolin 3D viewer bindings for Windows using pybind11."
+description = "Minimal pybind11 bindings for Pangolin on Windows (users install Pangolin deps themselves)."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 
 authors = [
-    { name = "Diego Bonilla", email = "diegobonilla98@gmail.com" }
+    { name = "Diego Bonilla", email = "diegobonila@gmail.com" }
 ]
 
-maintainers = [
-    { name = "Diego Bonilla", email = "diegobonilla98@gmail.com" }
-]
-
-keywords = [
-    "pangolin",
-    "3d",
-    "visualization",
-    "pybind11",
-    "windows",
-    "opengl"
-]
+keywords = ["pangolin", "3d", "visualization", "pybind11", "windows", "opengl"]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
