@@ -33,10 +33,10 @@ python demo.py
 
 Public PyPI package:
 
-- https://pypi.org/project/pangolin-windows-easy/0.1.0/
+- https://pypi.org/project/pangolin-fast/
 
 ```powershell
-pip install pangolin-windows-easy==0.1.0
+pip install pangolin-fast
 ```
 
 Note: the package still requires Pangolin and its Windows toolchain/runtime dependencies to be installed and configured first. Follow:
