@@ -1,26 +1,59 @@
 [build-system]
 requires = [
-  "scikit-build-core>=0.10",
-  "pybind11>=2.11",
-  "numpy>=1.24",
+    "scikit-build-core>=0.8",
+    "pybind11>=2.11",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pangolin_fast"
+name = "pangolin-fast"
 version = "0.1.0"
-description = "Fast Pangolin-backed realtime 3D viewer for Python."
+description = "High-performance Pangolin 3D viewer bindings for Windows using pybind11."
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-  "numpy>=1.24",
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Diego Bonilla", email = "diegobonilla98@gmail.com" }
 ]
 
+maintainers = [
+    { name = "Diego Bonilla", email = "diegobonilla98@gmail.com" }
+]
+
+keywords = [
+    "pangolin",
+    "3d",
+    "visualization",
+    "pybind11",
+    "windows",
+    "opengl"
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: C++",
+    "Operating System :: Microsoft :: Windows",
+    "License :: OSI Approved :: MIT License"
+]
+
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/diegobonilla98/Pangolin-3D-Windows"
+Repository = "https://github.com/diegobonilla98/Pangolin-3D-Windows"
+Issues = "https://github.com/diegobonilla98/Pangolin-3D-Windows/issues"
+
 [tool.scikit-build]
-cmake.version = ">=3.23"
-ninja.version = ">=1.11"
-wheel.packages = ["pangolin_fast"]
 build-dir = "build/{wheel_tag}"
 
-[tool.scikit-build.cmake.define]
-VCPKG_TARGET_TRIPLET = "x64-windows"
+[tool.scikit-build.cmake]
+build-type = "Release"
