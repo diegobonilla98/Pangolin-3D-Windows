@@ -6,7 +6,7 @@ requires = [
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pangolin-windows-easy"
+name = "pangolin-fast"
 version = "0.1.0"
 description = "Minimal pybind11 bindings for Pangolin on Windows (users install Pangolin deps themselves)."
 readme = "README.md"
