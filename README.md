@@ -1,162 +1,116 @@
-# Pangolin on Windows 11 (vcpkg + CMake + MSVC)
+# pangolin_fast
 
-Practical, working setup for running Pangolin natively on Windows with Visual Studio 2022 and vcpkg.
+`pangolin_fast` is a lightweight Python wrapper around Pangolin for fast, simple realtime 3D visualization.
 
-This repo currently contains:
+It is designed as a pragmatic alternative to heavier viewers when you want:
 
-- `test_first/` - a verified Pangolin C++ sample (`main.cpp`)
-- `INSTALL_PANGOLIN_WINDOWS.md` - install notes
-
-If you want to get running fast, follow the quick start below.
-
----
-
-## Quick Start
-
-From PowerShell:
-
-```powershell
-# 1) Open Developer PowerShell for VS 2022 (recommended), then:
-where cl
-
-# 2) Set vcpkg root (adjust if needed)
-$env:VCPKG_ROOT = "$env:USERPROFILE\vcpkg"
-
-# 3) Install Pangolin (safe to run again)
-& "$env:VCPKG_ROOT\vcpkg.exe" install pangolin:x64-windows
-
-# 4) Build sample
-cd <path-to-your-cloned-repo>\test_first
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
-cmake --build build --config Release
-
-# 5) Run sample
-$env:PATH = "$env:VCPKG_ROOT\installed\x64-windows\bin;$env:PATH"
-.\build\Release\pango_test.exe
-```
-
-If a Pangolin window opens, your setup is good.
+- High-FPS rendering with a dedicated C++ render thread
+- Minimal Python API for points, lines, meshes, poses, and UI controls
+- Low-overhead updates for dynamic scenes (e.g. SLAM, tracking, robotics, point-cloud streams)
 
 ---
 
-## Requirements
+## What This Repo Contains
 
-- Windows 11
-- Visual Studio 2022 Build Tools (or full VS) with:
-  - `Desktop development with C++`
-- CMake
-- vcpkg
-- PowerShell
+- `pangolin_fast/` - Python package entrypoint
+- `src/` - C++ viewer implementation + pybind11 bindings
+- `demo.py` - runnable usage example
+- `INSTALL_PANGOLIN_WINDOWS.md` - Pangolin/vcpkg/Windows setup guide
 
-### Verify compiler
+If you need help installing Pangolin itself on Windows, follow:
 
-```powershell
-where cl
-```
+- [INSTALL_PANGOLIN_WINDOWS.md](INSTALL_PANGOLIN_WINDOWS.md)
 
-If not found, open **Developer PowerShell for VS 2022**.
+---
 
-### Verify CMake
+## Quick Start (Library)
 
 ```powershell
-cmake --version
+# From this repo root:
+python -m pip install -e .
+python demo.py
 ```
 
-### Verify vcpkg
+If your Pangolin dependencies are in vcpkg and not on PATH, set:
 
 ```powershell
 $env:VCPKG_ROOT = "$env:USERPROFILE\vcpkg"
-& "$env:VCPKG_ROOT\vcpkg.exe" version
+```
+
+`pangolin_fast` will try to load DLLs from:
+
+- `VCPKG_ROOT\installed\x64-windows\bin`
+- `VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin`
+- `%USERPROFILE%\vcpkg\installed\x64-windows\bin`
+
+---
+
+## Minimal Usage
+
+```python
+import time
+import numpy as np
+from pangolin_fast import Viewer
+
+v = Viewer(width=1280, height=720, title="pangolin_fast")
+v.add_bool("show_grid", True)
+v.add_float("point_size", 2.0, 1.0, 8.0)
+v.add_grid("grid", half=10.0, step=1.0)
+
+xyz = np.random.uniform(-2, 2, size=(50000, 3)).astype(np.float32)
+rgb = np.clip((xyz + 2.0) / 4.0, 0.0, 1.0)
+v.add_points("cloud", xyz, rgb=rgb, dynamic=True)
+
+v.start()
+try:
+    while v.is_running():
+        ui = v.get_ui()
+        v.set_visible("grid", bool(ui.get("show_grid", True)))
+        v.set_point_size("cloud", float(ui.get("point_size", 2.0)))
+        v.update_points("cloud", xyz=xyz)
+        time.sleep(1.0 / 30.0)
+finally:
+    v.stop()
 ```
 
 ---
 
-## Repo Structure
+## API Overview
 
-```text
-Pangolin/
-├─ README.md
-├─ INSTALL_PANGOLIN_WINDOWS.md
-└─ test_first/
-   ├─ CMakeLists.txt
-   ├─ main.cpp
-   └─ build_command.bat
-```
+`Viewer` methods currently exposed:
 
----
+- Lifecycle: `start`, `stop`, `is_running`
+- Camera: `set_camera`, `set_projection`
+- Geometry:
+  - `add_points`, `update_points`, `set_point_size`
+  - `add_lines`
+  - `add_axis`, `add_grid`
+  - `add_mesh`
+  - `set_pose`
+  - `set_visible`, `remove`
+- UI vars: `add_bool`, `add_float`, `get_ui`
 
-## Build and Run `test_first`
+Input conventions:
 
-From `<path-to-your-cloned-repo>\test_first`:
-
-```powershell
-$env:VCPKG_ROOT = "$env:USERPROFILE\vcpkg"
-
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
-
-cmake --build build --config Release
-
-$env:PATH = "$env:VCPKG_ROOT\installed\x64-windows\bin;$env:PATH"
-.\build\Release\pango_test.exe
-```
+- Coordinates are NumPy arrays of shape `(N, 3)` and float32-compatible.
+- Colors accept float `[0,1]` or uint8 `[0,255]`, shape `(N, 3)`.
+- Mesh faces are integer arrays of shape `(M, 3)`.
+- Poses are 4x4 transform matrices.
 
 ---
 
-## How CMake Linking Works Here
+## Current Scope
 
-`test_first/CMakeLists.txt` uses:
-
-```cmake
-find_package(Pangolin CONFIG REQUIRED)
-target_link_libraries(pango_test PRIVATE ${Pangolin_LIBRARIES})
-```
-
-This is the correct pattern for the vcpkg Pangolin package used in this repo.
+- Target platform: Windows (native, Pangolin + vcpkg workflow)
+- Key focus: fast visualization and simple control loops from Python
+- `on_key` is currently a stub in this build
 
 ---
 
-## Troubleshooting
+## Installation Notes
 
-### `cl` not found
+This README is intentionally focused on using the Python library.
 
-Use **Developer PowerShell for VS 2022**.
+For Pangolin installation/toolchain setup, see:
 
-### Missing DLLs when launching executable
-
-Add vcpkg runtime path in the same terminal:
-
-```powershell
-$env:PATH = "$env:VCPKG_ROOT\installed\x64-windows\bin;$env:PATH"
-```
-
-### CMake cannot find Pangolin
-
-Ensure toolchain flag is passed during configure:
-
-```powershell
--DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
-```
-
-Also verify package is installed:
-
-```powershell
-& "$env:VCPKG_ROOT\vcpkg.exe" list | Select-String pangolin
-```
-
-### Safe rebuild from scratch
-
-```powershell
-Remove-Item -Recurse -Force .\build
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
-cmake --build build --config Release
-```
-
----
-
-## Notes
-
-- This repo is focused on native Windows builds (not WSL).
-- `INSTALL_PANGOLIN_WINDOWS.md` contains additional installation details and background.
+- [INSTALL_PANGOLIN_WINDOWS.md](INSTALL_PANGOLIN_WINDOWS.md)
