@@ -31,6 +31,18 @@ python -m pip install -e .
 python demo.py
 ```
 
+Public PyPI package:
+
+- https://pypi.org/project/pangolin-windows-easy/0.1.0/
+
+```powershell
+pip install pangolin-windows-easy==0.1.0
+```
+
+Note: the package still requires Pangolin and its Windows toolchain/runtime dependencies to be installed and configured first. Follow:
+
+- [INSTALL_PANGOLIN_WINDOWS.md](INSTALL_PANGOLIN_WINDOWS.md)
+
 If your Pangolin dependencies are in vcpkg and not on PATH, set:
 
 ```powershell
